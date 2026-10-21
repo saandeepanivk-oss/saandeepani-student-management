@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saandeepani Student Management System (SMS)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74b9ff, #a29bfe);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+        }
+        h2 { color: #2d3436; margin-bottom: 5px; font-size: 24px; }
+        .subtitle { color: #636e72; font-size: 14px; margin-bottom: 20px; font-weight: bold; }
+        p { color: #2d3436; font-size: 16px; }
+        input {
+            width: 80%;
+            padding: 12px;
+            font-size: 20px;
+            margin: 10px 0;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            text-align: center;
+            outline: none;
+        }
+        button {
+            background-color: #0984e3;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-size: 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 85%;
+            margin-top: 10px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        button:hover { opacity: 0.9; }
+        .btn-green { background-color: #00b894; }
+        .btn-orange { background-color: #d63031; }
+        .btn-admin { background-color: #6c5ce7; font-size: 14px; padding: 10px; width: 60%; margin-top: 25px; }
+        .hidden { display: none; }
+        .success { color: #00b894; font-weight: bold; font-size: 22px; margin-top: 15px; }
+        .error { color: #d63031; font-size: 14px; margin-top: 8px; font-weight: bold; }
+        
+        .student-name { font-size: 22px; color: #6c5ce7; font-weight: bold; margin: 5px 0; }
+        .student-batch { font-size: 13px; color: #e17055; font-weight: bold; margin-bottom: 10px; }
+        .fun-message { font-size: 15px; color: #0984e3; margin: 15px 0; font-weight: bold; background: #dfe6e9; padding: 12px; border-radius: 8px; line-height: 1.4; }
+        .birthday-banner { background: #ffeaa7; color: #d63031; border: 2px dashed #fab1a0; }
+        
+        table {
+            width: 100%;
+            font-size: 11px;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #dfe6e9;
+            padding: 5px;
+            text-align: left;
+        }
+        th { background-color: #f1f2f6; }
+        .table-container {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Saandeepani Attendance</h2>
+    <div class="subtitle">Student Management System (SMS)</div>
+
+    <!-- Page 1: Enter Student Code -->
+    <div id="screenCode">
+        <p style="font-weight: bold; color: #636e72;">Step 1: Enter your Student Code:</p>
+        <input type="text" id="studentCodeInput" placeholder="e.g. 1 or 27">
+        <br>
+        <button onclick="submitStudentCode()">Next ➔</button>
+        <br>
+        <button class="btn-admin" onclick="openAdminLogin()">🔒 Admin Dashboard</button>
+        <div id="codeErrorMsg" class="error"></div>
+    </div>
+
+    <!-- Page 2: Select Subject Stream & Action (Check-In / Check-Out) -->
+    <div id="screenAction" class="hidden">
+        <div id="welcomeStudentHeader" style="font-size: 18px; color: #0984e3; font-weight: bold; margin-bottom: 5px;"></div>
+        <p style="margin-bottom: 15px; color: #636e72;">Step 2: Choose Action:</p>
+        <button class="btn-green" onclick="setAction('IN')">📥 Check-In (Arrival)</button>
+        <button class="btn-orange" onclick="setAction('OUT')">📤 Check-Out (Leaving)</button>
+        <br>
+        <button style="background-color: #b2bec3; margin-top: 15px;" onclick="goHome()">⬅ Back</button>
+    </div>
+
+    <!-- Page 3: Enter 4-Digit Secret PIN & Voice Greetings -->
+    <div id="screenPin" class="hidden">
+        <div id="displayName" class="student-name"></div>
+        <div id="displayBatch" class="student-batch"></div>
+        <div id="funGreeting" class="fun-message"></div>
+        <p>Step 3: Enter 4-Digit Secret PIN:</p>
+        <input type="password" id="secretPinInput" placeholder="4-digit PIN">
+        <br>
+        <button id="confirmBtn" onclick="confirmAttendance()">Confirm ✅</button>
+        <button style="background-color: #b2bec3; margin-top: 10px;" onclick="backToAction()">⬅ Back</button>
+        <div id="pinErrorMsg" class="error"></div>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="screenSuccess" class="hidden">
+        <div id="successTitle" class="success">Success! 🎉</div>
+        <p id="successTime" style="color: #636e72; margin-top: 10px;"></p>
+    </div>
+
+    <!-- Admin PIN Login -->
+    <div id="screenAdminLogin" class="hidden">
+        <h3 style="color: #6c5ce7;">Admin Access</h3>
+        <p>Enter Admin Password:</p>
+        <input type="password" id="adminPinInput" placeholder="Enter PIN">
+        <br>
+        <button onclick="verifyAdminPin()">Login 🔓</button>
+        <button style="background-color: #b2bec3; margin-top: 10px;" onclick="goHome()">⬅ Back</button>
+        <div id="adminErrorMsg" class="error"></div>
+    </div>
+
+    <!-- Admin Dashboard Data View -->
+    <div id="screenAdminDashboard" class="hidden">
+        <h3 style="color: #6c5ce7; margin-top: 0;">Attendance Records</h3>
+        <div class="table-container">
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>Batch</th>
+                        <th>Name</th>
+                        <th>Action</th>
+                        <th>Time</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Logs inserted here -->
+                </tbody>
+            </table>
+        </div>
+        <button class="btn-green" style="font-size: 13px; padding: 8px;" onclick="downloadCSV()">📥 Download Excel Report</button>
+        <button class="btn-orange" style="font-size: 13px; padding: 8px;" onclick="clearLogs()">🗑 Clear Logs</button>
+        <button style="background-color: #b2bec3; margin-top: 8px; font-size: 13px; padding: 8px;" onclick="goHome()">🏠 Home</button>
+    </div>
+</div>
+
+<script>
+    // Indian Accent Speech Synthesis helper
+    function speak(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            
+            const voices = window.speechSynthesis.getVoices();
+            const indianVoice = voices.find(v => v.lang === 'en-IN' || v.name.includes('India') || v.name.includes('Rishanu') || v.name.includes('Heera'));
+            if (indianVoice) {
+                utterance.voice = indianVoice;
+            }
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function playBirthdaySong() {
+        if (!window.AudioContext && !window.webkitAudioContext) return;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [
+            { freq: 264, duration: 300 }, { freq: 264, duration: 300 }, { freq: 297, duration: 600 }, { freq: 264, duration: 600 }, { freq: 352, duration: 600 }, { freq: 330, duration: 1200 },
+            { freq: 264, duration: 300 }, { freq: 264, duration: 300 }, { freq: 297, duration: 600 }, { freq: 264, duration: 600 }, { freq: 396, duration: 600 }, { freq: 352, duration: 1200 }
+        ];
+        let time = audioCtx.currentTime;
+        notes.forEach(note => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = note.freq;
+            gain.gain.setValueAtTime(0.15, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + (note.duration / 1000));
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(time);
+            osc.stop(time + (note.duration / 1000));
+            time += (note.duration / 1000) + 0.05;
+        });
+    }
+
+    window.onload = function() {
+        speak("Welcome to Saandeepani Attendance Portal. Please enter your student code.");
+    };
+
+    // Master Student Roster from your sheet
+    const masterStudents = [
+        { code: "1", name: "Dhruv Varghese", pin: "2601", dob: "21/09", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
+        { code: "2", name: "Isha Varghese", pin: "2602", dob: "15/09", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
+        { code: "3", name: "Kanishka P Naik", pin: "2603", dob: "14/04", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
+        { code: "4", name: "Mahati V", pin: "2604", dob: "04/11", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
+        { code: "5", name: "Devata Parin Krishna", pin: "2605", dob: "20/09", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
+        { code: "6", name: "Puspen Bouri", pin: "2606", dob: "05/11", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
+        { code: "7", name: "Vaishnavi Singh", pin: "2607", dob: "02/02", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
+        { code: "8", name: "Abhinav V Inamdar", pin: "2608", dob: "25/04", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
+        { code: "9", name: "Dattatreya V Inamdar", pin: "2609", dob: "01/04", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
+        { code: "10", name: "Jayanth.K", pin: "2610", dob: "21/12", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
+        { code: "11", name: "Nishvitha", pin: "2611", dob: "21/12", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
+        
+        { code: "12", name: "DHRUVIKA.A", pin: "2612", dob: "27/08", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "13", name: "M Charuvika", pin: "2613", dob: "11/10", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "14", name: "Manaswini V Vasishtha", pin: "2614", dob: "22/07", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "16", name: "CHIRAG V", pin: "2616", dob: "09/02", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "17", name: "Hanup", pin: "2617", dob: "11/08", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "18", name: "Yuvan", pin: "2618", dob: "16/04", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "19", name: "Punarvika", pin: "2619", dob: "01/06", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "20", name: "Abhiti", pin: "2620", dob: "20/11", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        
+        { code: "21", name: "Ayra Patil Kulkarni", pin: "2621", dob: "20/10", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "22", name: "Nikshitha T S", pin: "2622", dob: "20/10", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "23", name: "V Rishika saanvi", pin: "2623", dob: "20/10", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "24", name: "Swara Sachin Allishe", pin: "2624", dob: "20/09", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "25", name: "Tanvi Mahaveer Gebise", pin: "2625", dob: "20/10", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        { code: "26", name: "Vibhashree Joshi", pin: "2626", dob: "11/08", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
+        
+        { code: "27", name: "B V Sai Shreeya", pin: "2627", dob: "20/10", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" },
+        { code: "28", name: "Dhruv Varghese", pin: "2601", dob: "21/09", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" },
+        { code: "29", name: "Kanishka P Naik", pin: "2603", dob: "14/04", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" },
+        { code: "30", name: "Devata Parin Krishna", pin: "2605", dob: "20/09", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" },
+        { code: "31", name: "Abhinav V Inamdar", pin: "2608", dob: "25/04", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" },
+        { code: "32", name: "Dattatreya V Inamdar", pin: "2609", dob: "01/04", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" }
+    ];
+
+    let currentStudent = null;
+    let currentMode = ""; // IN or OUT
+
+    function submitStudentCode() {
+        const codeInput = document.getElementById("studentCodeInput").value.trim();
+        const errorMsg = document.getElementById("codeErrorMsg");
+
+        const found = masterStudents.find(s => s.code.toLowerCase() === codeInput.toLowerCase());
+        if (found) {
+            currentStudent = found;
+            errorMsg.innerText = "";
+            speak("Hello " + found.name + ". Please select check in or check out.");
+            document.getElementById("screenCode").classList.add("hidden");
+            document.getElementById("screenAction").classList.remove("hidden");
+            document.getElementById("welcomeStudentHeader.innerText").innerText = "Student: " + found.name + " (Batch: " + found.batch + ")";
+        } else {
+            speak("Student code not found. Please check and try again.");
+            errorMsg.innerText = "❌ Code not found. Try again.";
+        }
+    }
+
+    function setAction(mode) {
+        currentMode = mode;
+        const actionText = mode === 'IN' ? "Check-In" : "Check-Out";
+        
+        speak(actionText + " selected. Please enter your 4-digit secret PIN.");
+        document.getElementById("screenAction").classList.add("hidden");
+        document.getElementById("screenPin").classList.remove("hidden");
+
+        document.getElementById("displayName").innerText = "Hi, " + currentStudent.name + "!";
+        document.getElementById("displayBatch").innerText = "Batch: " + currentStudent.batch;
+        
+        // Birthday check
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const todayStr = dd + "/" + mm;
+
+        const greetingBox = document.getElementById("funGreeting");
+        if (currentStudent.dob === todayStr) {
+            playBirthdaySong();
+            greetingBox.className = "fun-message birthday-banner";
+            greetingBox.innerHTML = "🎂 HAPPY BIRTHDAY " + currentStudent.name.toUpperCase() + "! 🎉";
+        } else {
+            greetingBox.className = "fun-message";
+            greetingBox.innerText = mode === 'IN' ? "Welcome to Class! Enter your PIN." : "Great job today! Enter PIN to Check-Out.";
+        }
+
+        document.getElementById("secretPinInput").value = "";
+        document.getElementById("pinErrorMsg").innerText = "";
+        document.getElementById("secretPinInput").focus();
+    }
+
+    function confirmAttendance() {
+        const pinInput = document.getElementById("secretPinInput").value.trim();
+        const pinErrorMsg = document.getElementById("pinErrorMsg");
+
+        if (pinInput === currentStudent.pin) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString() + " (" + now.toLocaleDateString() + ")";
+            const actionType = currentMode === 'IN' ? "Checked In" : "Checked Out";
+
+            let attendanceLog = JSON.parse(localStorage.getItem("attendanceLog") || "[]");
+            attendanceLog.push({ 
+                batch: currentStudent.batch, 
+                name: currentStudent.name, 
+                code: currentStudent.code, 
+                action: actionType, 
+                time: timeString,
+                email: currentStudent.email 
+            });
+            localStorage.setItem("attendanceLog", JSON.stringify(attendanceLog));
+
+            document.getElementById("screenPin").classList.add("hidden");
+            document.getElementById("screenSuccess").classList.remove("hidden");
+
+            if (currentMode === 'IN') {
+                document.getElementById("successTitle").innerText = "Checked In Successfully! 🎉";
+                speak("Thank you " + currentStudent.name + ". Checked in successfully. Notification sent.");
+            } else {
+                document.getElementById("successTitle").innerText = "Checked Out Safely! 👋";
+                speak("Goodbye " + currentStudent.name + ". Have a safe trip home!");
+            }
+            document.getElementById("successTime").innerText = timeString;
+
+            setTimeout(goHome, 5000);
+        } else {
+            speak("Incorrect secret PIN. Try again.");
+            pinErrorMsg.innerText = "❌ Incorrect Secret PIN. Try again.";
+        }
+    }
+
+    function goHome() {
+        speak("Welcome to Saandeepani Attendance Portal. Please enter your student code.");
+        document.getElementById("screenAction").classList.add("hidden");
+        document.getElementById("screenPin").classList.add("hidden");
+        document.getElementById("screenSuccess").classList.add("hidden");
+        document.getElementById("screenAdminLogin").classList.add("hidden");
+        document.getElementById("screenAdminDashboard").classList.add("hidden");
+        document.getElementById("screenCode").classList.remove("hidden");
+        document.getElementById("studentCodeInput").value = "";
+        document.getElementById("codeErrorMsg").innerText = "";
+        currentStudent = null;
+    }
+
+    function backToAction() {
+        document.getElementById("screenPin").classList.add("hidden");
+        document.getElementById("screenAction").classList.remove("hidden");
+    }
+
+    function openAdminLogin() {
+        document.getElementById("screenCode").classList.add("hidden");
+        document.getElementById("screenAdminLogin").classList.remove("hidden");
+        document.getElementById("adminPinInput").value = "";
+        document.getElementById("adminErrorMsg").innerText = "";
+        document.getElementById("adminPinInput").focus();
+    }
+
+    function verifyAdminPin() {
+        const pin = document.getElementById("adminPinInput").value.trim();
+        if (pin === "1234") {
+            document.getElementById("screenAdminLogin").classList.add("hidden");
+            document.getElementById("screenAdminDashboard").classList.remove("hidden");
+            loadAttendanceTable();
+        } else {
+            document.getElementById("adminErrorMsg").innerText = "❌ Incorrect Admin PIN!";
+        }
+    }
+
+    function loadAttendanceTable() {
+        let attendanceLog = JSON.parse(localStorage.getItem("attendanceLog") || "[]");
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+
+        if (attendanceLog.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No attendance records yet.</td></tr>";
+            return;
+        }
+
+        attendanceLog.slice().reverse().forEach(log => {
+            let row = `<tr>
+                <td>${log.batch}</td>
+                <td><b>${log.name}</b></td>
+                <td>${log.action}</td>
+                <td>${log.time}</td>
+                <td>${log.email}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function clearLogs() {
+        if (confirm("Are you sure you want to clear all attendance logs?")) {
+            localStorage.removeItem("attendanceLog");
+            loadAttendanceTable();
+        }
+    }
+
+    function downloadCSV() {
+        let attendanceLog = JSON.parse(localStorage.getItem("attendanceLog") || "[]");
+        if (attendanceLog.length === 0) {
+            alert("No records to download!");
+            return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,Batch,Student Name,Code,Action,Timestamp,Parent Email\r\n";
+        attendanceLog.forEach(row => {
+            csvContent += `"${row.batch}","${row.name}","${row.code}","${row.action}","${row.time}","${row.email}"\r\n`;
+        });
+
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "Saandeepani_Attendance_Report.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+</body>
+</html>
