@@ -51,6 +51,8 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
         button:hover { opacity: 0.9; }
+        .btn-abacus { background-color: #00b894; }
+        .btn-vedic { background-color: #e17055; }
         .btn-green { background-color: #00b894; }
         .btn-orange { background-color: #d63031; }
         .btn-admin { background-color: #6c5ce7; font-size: 14px; padding: 10px; width: 60%; margin-top: 25px; }
@@ -99,22 +101,33 @@
         <div id="codeErrorMsg" class="error"></div>
     </div>
 
-    <!-- Page 2: Select Subject Stream & Action (Check-In / Check-Out) -->
-    <div id="screenAction" class="hidden">
+    <!-- Page 2: Select Subject Stream -->
+    <div id="screenStream" class="hidden">
         <div id="welcomeStudentHeader" style="font-size: 18px; color: #0984e3; font-weight: bold; margin-bottom: 5px;"></div>
-        <p style="margin-bottom: 15px; color: #636e72;">Step 2: Choose Action:</p>
-        <button class="btn-green" onclick="setAction('IN')">📥 Check-In (Arrival)</button>
-        <button class="btn-orange" onclick="setAction('OUT')">📤 Check-Out (Leaving)</button>
+        <p style="margin-bottom: 15px; color: #636e72;">Step 2: Select Subject Stream:</p>
+        <button class="btn-abacus" onclick="selectStream('Abacus')">🧮 Abacus Class</button>
+        <button class="btn-vedic" onclick="selectStream('Vedic Maths')">📐 Vedic Maths</button>
         <br>
         <button style="background-color: #b2bec3; margin-top: 15px;" onclick="goHome()">⬅ Back</button>
     </div>
 
-    <!-- Page 3: Enter 4-Digit Secret PIN & Voice Greetings -->
+    <!-- Page 3: Select Action (Check-In / Check-Out) -->
+    <div id="screenAction" class="hidden">
+        <div id="actionStreamHeader" style="font-size: 18px; color: #0984e3; font-weight: bold; margin-bottom: 5px;"></div>
+        <p style="margin-bottom: 15px; color: #636e72;">Step 3: Choose Action:</p>
+        <button class="btn-green" onclick="setAction('IN')">📥 Check-In (Arrival)</button>
+        <button class="btn-orange" onclick="setAction('OUT')">📤 Check-Out (Leaving)</button>
+        <br>
+        <button style="background-color: #b2bec3; margin-top: 15px;" onclick="backToStream()">⬅ Back</button>
+        <div id="actionErrorMsg" class="error"></div>
+    </div>
+
+    <!-- Page 4: Enter 4-Digit Secret PIN & Voice Greetings -->
     <div id="screenPin" class="hidden">
         <div id="displayName" class="student-name"></div>
         <div id="displayBatch" class="student-batch"></div>
         <div id="funGreeting" class="fun-message"></div>
-        <p>Step 3: Enter 4-Digit Secret PIN:</p>
+        <p>Step 4: Enter 4-Digit Secret PIN:</p>
         <input type="password" id="secretPinInput" placeholder="4-digit PIN">
         <br>
         <button id="confirmBtn" onclick="confirmAttendance()">Confirm ✅</button>
@@ -146,7 +159,7 @@
             <table id="attendanceTable">
                 <thead>
                     <tr>
-                        <th>Batch</th>
+                        <th>Stream</th>
                         <th>Name</th>
                         <th>Action</th>
                         <th>Time</th>
@@ -165,19 +178,18 @@
 </div>
 
 <script>
-    // Indian Accent Speech Synthesis helper
+    // Connected Google Apps Script Web App URL
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTTifk-fP3KMHmOY8aRAQ3VPpdG0xJyN1FUqFrwqbn59jFH6V1OM8hfvAFfvxG_7of/exec";
+
     function speak(text) {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.9;
             utterance.pitch = 1.0;
-            
             const voices = window.speechSynthesis.getVoices();
             const indianVoice = voices.find(v => v.lang === 'en-IN' || v.name.includes('India') || v.name.includes('Rishanu') || v.name.includes('Heera'));
-            if (indianVoice) {
-                utterance.voice = indianVoice;
-            }
+            if (indianVoice) utterance.voice = indianVoice;
             window.speechSynthesis.speak(utterance);
         }
     }
@@ -209,46 +221,55 @@
         speak("Welcome to Saandeepani Attendance Portal. Please enter your student code.");
     };
 
-    // Master Student Roster from your sheet
     const masterStudents = [
-        { code: "1", name: "Dhruv Varghese", pin: "2601", dob: "21/09", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
-        { code: "2", name: "Isha Varghese", pin: "2602", dob: "15/09", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
-        { code: "3", name: "Kanishka P Naik", pin: "2603", dob: "14/04", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
-        { code: "4", name: "Mahati V", pin: "2604", dob: "04/11", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
-        { code: "5", name: "Devata Parin Krishna", pin: "2605", dob: "20/09", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
-        { code: "6", name: "Puspen Bouri", pin: "2606", dob: "05/11", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
-        { code: "7", name: "Vaishnavi Singh", pin: "2607", dob: "02/02", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
-        { code: "8", name: "Abhinav V Inamdar", pin: "2608", dob: "25/04", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
-        { code: "9", name: "Dattatreya V Inamdar", pin: "2609", dob: "01/04", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
-        { code: "10", name: "Jayanth.K", pin: "2610", dob: "21/12", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
-        { code: "11", name: "Nishvitha", pin: "2611", dob: "21/12", batch: "SVK Abacus 1111", timetable: "Wednesday 5.30 to 6.30 PM & Friday 6.45 to 7.45 PM", email: "suneelbm@gmail.com" },
-        
-        { code: "12", name: "DHRUVIKA.A", pin: "2612", dob: "27/08", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "13", name: "M Charuvika", pin: "2613", dob: "11/10", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "14", name: "Manaswini V Vasishtha", pin: "2614", dob: "22/07", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "16", name: "CHIRAG V", pin: "2616", dob: "09/02", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "17", name: "Hanup", pin: "2617", dob: "11/08", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "18", name: "Yuvan", pin: "2618", dob: "16/04", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "19", name: "Punarvika", pin: "2619", dob: "01/06", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "20", name: "Abhiti", pin: "2620", dob: "20/11", batch: "SVK Abacus 2222", timetable: "Monday 6.15 PM to 7.15 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        
-        { code: "21", name: "Ayra Patil Kulkarni", pin: "2621", dob: "20/10", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "22", name: "Nikshitha T S", pin: "2622", dob: "20/10", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "23", name: "V Rishika saanvi", pin: "2623", dob: "20/10", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "24", name: "Swara Sachin Allishe", pin: "2624", dob: "20/09", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "25", name: "Tanvi Mahaveer Gebise", pin: "2625", dob: "20/10", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        { code: "26", name: "Vibhashree Joshi", pin: "2626", dob: "11/08", batch: "SVK Abacus 3333", timetable: "Monday at 5.30 to 6.30 & Wednesday at 6.45 to 7.45", email: "suneelbm@gmail.com" },
-        
-        { code: "27", name: "B V Sai Shreeya", pin: "2627", dob: "20/10", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" },
-        { code: "28", name: "Dhruv Varghese", pin: "2601", dob: "21/09", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" },
-        { code: "29", name: "Kanishka P Naik", pin: "2603", dob: "14/04", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" },
-        { code: "30", name: "Devata Parin Krishna", pin: "2605", dob: "20/09", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" },
-        { code: "31", name: "Abhinav V Inamdar", pin: "2608", dob: "25/04", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" },
-        { code: "32", name: "Dattatreya V Inamdar", pin: "2609", dob: "01/04", batch: "SVK Vedic Math 1111", timetable: "Monday at 7.15 PM to 8.15 & Friday at 7.45 to 8.45", email: "suneelbm@gmail.com" }
+        { code: "1", name: "Dhruv Varghese", pin: "2601", dob: "21/09", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "2", name: "Isha Varghese", pin: "2602", dob: "15/09", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "3", name: "Kanishka P Naik", pin: "2603", dob: "14/04", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "4", name: "Mahati V", pin: "2604", dob: "04/11", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "5", name: "Devata Parin Krishna", pin: "2605", dob: "20/09", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "6", name: "Puspen Bouri", pin: "2606", dob: "05/11", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "7", name: "Vaishnavi Singh", pin: "2607", dob: "02/02", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "8", name: "Abhinav V Inamdar", pin: "2608", dob: "25/04", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "9", name: "Dattatreya V Inamdar", pin: "2609", dob: "01/04", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "10", name: "Jayanth.K", pin: "2610", dob: "21/12", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "11", name: "Nishvitha", pin: "2611", dob: "21/12", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "12", name: "DHRUVIKA.A", pin: "2612", dob: "27/08", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
+        { code: "13", name: "M Charuvika", pin: "2613", dob: "11/10", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
+        { code: "14", name: "Manaswini V Vasishtha", pin: "2614", dob: "22/07", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
+        { code: "16", name: "CHIRAG V", pin: "2616", dob: "09/02", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
+        { code: "17", name: "Hanup", pin: "2617", dob: "11/08", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
+        { code: "18", name: "Yuvan", pin: "2618", dob: "16/04", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
+        { code: "19", name: "Punarvika", pin: "2619", dob: "01/06", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
+        { code: "20", name: "Abhiti", pin: "2620", dob: "20/11", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
+        { code: "21", name: "Ayra Patil Kulkarni", pin: "2621", dob: "20/10", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
+        { code: "22", name: "Nikshitha T S", pin: "2622", dob: "20/10", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
+        { code: "23", name: "V Rishika saanvi", pin: "2623", dob: "20/10", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
+        { code: "24", name: "Swara Sachin Allishe", pin: "2624", dob: "20/09", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
+        { code: "25", name: "Tanvi Mahaveer Gebise", pin: "2625", dob: "20/10", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
+        { code: "26", name: "Vibhashree Joshi", pin: "2626", dob: "11/08", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
+        { code: "27", name: "B V Sai Shreeya", pin: "2627", dob: "20/10", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" },
+        { code: "28", name: "Dhruv Varghese", pin: "2601", dob: "21/09", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" },
+        { code: "29", name: "Kanishka P Naik", pin: "2603", dob: "14/04", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" },
+        { code: "30", name: "Devata Parin Krishna", pin: "2605", dob: "20/09", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" },
+        { code: "31", name: "Abhinav V Inamdar", pin: "2608", dob: "25/04", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" },
+        { code: "32", name: "Dattatreya V Inamdar", pin: "2609", dob: "01/04", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" }
     ];
 
     let currentStudent = null;
+    let selectedStream = "";
     let currentMode = ""; // IN or OUT
+
+    function isCurrentlyCheckedIn(code, stream) {
+        let attendanceLog = JSON.parse(localStorage.getItem("attendanceLog") || "[]");
+        let status = false;
+        attendanceLog.forEach(log => {
+            if (log.code === code && log.stream === stream) {
+                if (log.action === "Checked In") status = true;
+                if (log.action === "Checked Out") status = false;
+            }
+        });
+        return status;
+    }
 
     function submitStudentCode() {
         const codeInput = document.getElementById("studentCodeInput").value.trim();
@@ -258,17 +279,40 @@
         if (found) {
             currentStudent = found;
             errorMsg.innerText = "";
-            speak("Hello " + found.name + ". Please select check in or check out.");
+            speak("Hello " + found.name + ". Please select your subject stream.");
             document.getElementById("screenCode").classList.add("hidden");
-            document.getElementById("screenAction").classList.remove("hidden");
-            document.getElementById("welcomeStudentHeader.innerText").innerText = "Student: " + found.name + " (Batch: " + found.batch + ")";
+            document.getElementById("screenStream").classList.remove("hidden");
+            document.getElementById("welcomeStudentHeader").innerText = "Student: " + found.name + " (Code: " + found.code + ")";
         } else {
-            speak("Student code not found. Please check and try again.");
+            speak("Student code not found. Please try again.");
             errorMsg.innerText = "❌ Code not found. Try again.";
         }
     }
 
+    function selectStream(stream) {
+        selectedStream = stream;
+        speak(stream + " selected. Please choose check in or check out.");
+        document.getElementById("screenStream").classList.add("hidden");
+        document.getElementById("screenAction").classList.remove("hidden");
+        document.getElementById("actionStreamHeader").innerText = currentStudent.name + " - " + stream;
+        document.getElementById("actionErrorMsg").innerText = "";
+    }
+
     function setAction(mode) {
+        const alreadyIn = isCurrentlyCheckedIn(currentStudent.code, selectedStream);
+        const actionErrorMsg = document.getElementById("actionErrorMsg");
+
+        if (mode === 'IN' && alreadyIn) {
+            speak(currentStudent.name + ", you are already checked in for " + selectedStream + "!");
+            actionErrorMsg.innerText = "⚠️ Already checked in for " + selectedStream + "!";
+            return;
+        }
+        if (mode === 'OUT' && !alreadyIn) {
+            speak(currentStudent.name + ", you have not checked in for " + selectedStream + " yet!");
+            actionErrorMsg.innerText = "⚠️ Not checked in for " + selectedStream + " yet!";
+            return;
+        }
+
         currentMode = mode;
         const actionText = mode === 'IN' ? "Check-In" : "Check-Out";
         
@@ -277,9 +321,8 @@
         document.getElementById("screenPin").classList.remove("hidden");
 
         document.getElementById("displayName").innerText = "Hi, " + currentStudent.name + "!";
-        document.getElementById("displayBatch").innerText = "Batch: " + currentStudent.batch;
+        document.getElementById("displayBatch").innerText = "Stream: " + selectedStream + " | Enrolled Batch: " + currentStudent.batch;
         
-        // Birthday check
         const today = new Date();
         const dd = String(today.getDate()).padStart(2, '0');
         const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -309,9 +352,10 @@
             const timeString = now.toLocaleTimeString() + " (" + now.toLocaleDateString() + ")";
             const actionType = currentMode === 'IN' ? "Checked In" : "Checked Out";
 
+            // Save locally
             let attendanceLog = JSON.parse(localStorage.getItem("attendanceLog") || "[]");
             attendanceLog.push({ 
-                batch: currentStudent.batch, 
+                stream: selectedStream, 
                 name: currentStudent.name, 
                 code: currentStudent.code, 
                 action: actionType, 
@@ -320,15 +364,32 @@
             });
             localStorage.setItem("attendanceLog", JSON.stringify(attendanceLog));
 
+            // Send live email via Google Apps Script Web App
+            const payload = {
+                stream: selectedStream,
+                name: currentStudent.name,
+                code: currentStudent.code,
+                action: actionType,
+                time: timeString,
+                email: currentStudent.email
+            };
+
+            fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(err => console.log('Email dispatch note:', err));
+
             document.getElementById("screenPin").classList.add("hidden");
             document.getElementById("screenSuccess").classList.remove("hidden");
 
             if (currentMode === 'IN') {
                 document.getElementById("successTitle").innerText = "Checked In Successfully! 🎉";
-                speak("Thank you " + currentStudent.name + ". Checked in successfully. Notification sent.");
+                speak("Thank you " + currentStudent.name + ". Checked in successfully. Email notification sent.");
             } else {
                 document.getElementById("successTitle").innerText = "Checked Out Safely! 👋";
-                speak("Goodbye " + currentStudent.name + ". Have a safe trip home!");
+                speak("Goodbye " + currentStudent.name + ". Have a safe trip home! Email notification sent.");
             }
             document.getElementById("successTime").innerText = timeString;
 
@@ -341,6 +402,7 @@
 
     function goHome() {
         speak("Welcome to Saandeepani Attendance Portal. Please enter your student code.");
+        document.getElementById("screenStream").classList.add("hidden");
         document.getElementById("screenAction").classList.add("hidden");
         document.getElementById("screenPin").classList.add("hidden");
         document.getElementById("screenSuccess").classList.add("hidden");
@@ -350,6 +412,12 @@
         document.getElementById("studentCodeInput").value = "";
         document.getElementById("codeErrorMsg").innerText = "";
         currentStudent = null;
+        selectedStream = "";
+    }
+
+    function backToStream() {
+        document.getElementById("screenAction").classList.add("hidden");
+        document.getElementById("screenStream").classList.remove("hidden");
     }
 
     function backToAction() {
@@ -388,7 +456,7 @@
 
         attendanceLog.slice().reverse().forEach(log => {
             let row = `<tr>
-                <td>${log.batch}</td>
+                <td>${log.stream}</td>
                 <td><b>${log.name}</b></td>
                 <td>${log.action}</td>
                 <td>${log.time}</td>
@@ -412,9 +480,9 @@
             return;
         }
 
-        let csvContent = "data:text/csv;charset=utf-8,Batch,Student Name,Code,Action,Timestamp,Parent Email\r\n";
+        let csvContent = "data:text/csv;charset=utf-8,Stream,Student Name,Code,Action,Timestamp,Parent Email\r\n";
         attendanceLog.forEach(row => {
-            csvContent += `"${row.batch}","${row.name}","${row.code}","${row.action}","${row.time}","${row.email}"\r\n`;
+            csvContent += `"${row.stream}","${row.name}","${row.code}","${row.action}","${row.time}","${row.email}"\r\n`;
         });
 
         let encodedUri = encodeURI(csvContent);
