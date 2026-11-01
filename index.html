@@ -386,10 +386,10 @@
 
             if (currentMode === 'IN') {
                 document.getElementById("successTitle").innerText = "Checked In Successfully! 🎉";
-                speak("Thank you " + currentStudent.name + ". Checked in successfully. Email notification sent.");
+                speak("Thank you " + currentStudent.name + ". Checked in successfully. Email sent.");
             } else {
                 document.getElementById("successTitle").innerText = "Checked Out Safely! 👋";
-                speak("Goodbye " + currentStudent.name + ". Have a safe trip home! Email notification sent.");
+                speak("Goodbye " + currentStudent.name + ". Email sent.");
             }
             document.getElementById("successTime").innerText = timeString;
 
