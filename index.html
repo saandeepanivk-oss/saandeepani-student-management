@@ -218,41 +218,41 @@
     }
 
     window.onload = function() {
-        speak("Welcome to Saandeepani Attendance Portal. Please enter your student code.");
+        speak("Welcome to SAP. Please enter your student code.");
     };
 
     const masterStudents = [
-        { code: "1", name: "Dhruv Varghese", pin: "2601", dob: "21/09", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
-        { code: "2", name: "Isha Varghese", pin: "2602", dob: "15/09", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
-        { code: "3", name: "Kanishka P Naik", pin: "2603", dob: "14/04", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "1", name: "Dhruv Varghese", pin: "2601", dob: "21/09", batch: "SVK Abacus 1111", email: "b.valsaraj@gmail.com" },
+        { code: "2", name: "Isha Varghese", pin: "2602", dob: "15/09", batch: "SVK Abacus 1111", email: "b.valsaraj@gmail.com" },
+        { code: "3", name: "Kanishka P Naik", pin: "2603", dob: "14/04", batch: "SVK Abacus 1111", email: "harshau44@gmail.com" },
         { code: "4", name: "Mahati V", pin: "2604", dob: "04/11", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
-        { code: "5", name: "Devata Parin Krishna", pin: "2605", dob: "20/09", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
-        { code: "6", name: "Puspen Bouri", pin: "2606", dob: "05/11", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
-        { code: "7", name: "Vaishnavi Singh", pin: "2607", dob: "02/02", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
-        { code: "8", name: "Abhinav V Inamdar", pin: "2608", dob: "25/04", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
-        { code: "9", name: "Dattatreya V Inamdar", pin: "2609", dob: "01/04", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
+        { code: "5", name: "Devata Parin Krishna", pin: "2605", dob: "20/09", batch: "SVK Abacus 1111", email: "nandurumrudula@gmail.com" },
+        { code: "6", name: "Puspen Bouri", pin: "2606", dob: "05/11", batch: "SVK Abacus 1111", email: "manoj.bcrec@gmail.com" },
+        { code: "7", name: "Vaishnavi Singh", pin: "2607", dob: "02/02", batch: "SVK Abacus 1111", email: "snehakashyap097@gmail.com" },
+        { code: "8", name: "Abhinav V Inamdar", pin: "2608", dob: "25/04", batch: "SVK Abacus 1111", email: "preetivi.1991@gmail.com" },
+        { code: "9", name: "Dattatreya V Inamdar", pin: "2609", dob: "01/04", batch: "SVK Abacus 1111", email: "preetivi.1991@gmail.com" },
         { code: "10", name: "Jayanth.K", pin: "2610", dob: "21/12", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
         { code: "11", name: "Nishvitha", pin: "2611", dob: "21/12", batch: "SVK Abacus 1111", email: "suneelbm@gmail.com" },
-        { code: "12", name: "DHRUVIKA.A", pin: "2612", dob: "27/08", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
-        { code: "13", name: "M Charuvika", pin: "2613", dob: "11/10", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
-        { code: "14", name: "Manaswini V Vasishtha", pin: "2614", dob: "22/07", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
-        { code: "16", name: "CHIRAG V", pin: "2616", dob: "09/02", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
-        { code: "17", name: "Hanup", pin: "2617", dob: "11/08", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
+        { code: "12", name: "DHRUVIKA.A", pin: "2612", dob: "27/08", batch: "SVK Abacus 2222", email: "babi.anu21@gmail.com" },
+        { code: "13", name: "M Charuvika", pin: "2613", dob: "11/10", batch: "SVK Abacus 2222", email: "vidhyavenkatesan11@gmail.com" },
+        { code: "14", name: "Manaswini V Vasishtha", pin: "2614", dob: "22/07", batch: "SVK Abacus 2222", email: "ashwinis.249@gmail.com" },
+        { code: "16", name: "CHIRAG V", pin: "2616", dob: "09/02", batch: "SVK Abacus 2222", email: "srbhavyavinu@gmail.com" },
+        { code: "17", name: "Hanup", pin: "2617", dob: "11/08", batch: "SVK Abacus 2222", email: "pavithrahr61@gmail.com" },
         { code: "18", name: "Yuvan", pin: "2618", dob: "16/04", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
-        { code: "19", name: "Punarvika", pin: "2619", dob: "01/06", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
-        { code: "20", name: "Abhiti", pin: "2620", dob: "20/11", batch: "SVK Abacus 2222", email: "suneelbm@gmail.com" },
+        { code: "19", name: "Punarvika", pin: "2619", dob: "01/06", batch: "SVK Abacus 2222", email: "babi.anu21@gmail.com" },
+        { code: "20", name: "Abhiti", pin: "2620", dob: "20/11", batch: "SVK Abacus 2222", email: "Geetamakhija73@gmail.com" },
         { code: "21", name: "Ayra Patil Kulkarni", pin: "2621", dob: "20/10", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
-        { code: "22", name: "Nikshitha T S", pin: "2622", dob: "20/10", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
+        { code: "22", name: "Nikshitha T S", pin: "2622", dob: "20/10", batch: "SVK Abacus 3333", email: "Vidyatg27@gmail.com " },
         { code: "23", name: "V Rishika saanvi", pin: "2623", dob: "20/10", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
-        { code: "24", name: "Swara Sachin Allishe", pin: "2624", dob: "20/09", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
+        { code: "24", name: "Swara Sachin Allishe", pin: "2624", dob: "20/09", batch: "SVK Abacus 3333", email: "dr.sachin14319@gmail.com" },
         { code: "25", name: "Tanvi Mahaveer Gebise", pin: "2625", dob: "20/10", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
-        { code: "26", name: "Vibhashree Joshi", pin: "2626", dob: "11/08", batch: "SVK Abacus 3333", email: "suneelbm@gmail.com" },
-        { code: "27", name: "B V Sai Shreeya", pin: "2627", dob: "20/10", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" },
-        { code: "28", name: "Dhruv Varghese", pin: "2601", dob: "21/09", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" },
-        { code: "29", name: "Kanishka P Naik", pin: "2603", dob: "14/04", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" },
+        { code: "26", name: "Vibhashree Joshi", pin: "2626", dob: "11/08", batch: "SVK Abacus 3333", email: "Anushri.jn2016@gmail.com" },
+        { code: "27", name: "B V Sai Shreeya", pin: "2627", dob: "20/10", batch: "SVK Vedic Math 1111", email: "swathibhimarapu@gmail.com" },
+        { code: "28", name: "Dhruv Varghese", pin: "2601", dob: "21/09", batch: "SVK Vedic Math 1111", email: "b.valsaraj@gmail.com" },
+        { code: "29", name: "Kanishka P Naik", pin: "2603", dob: "14/04", batch: "SVK Vedic Math 1111", email: "harshau44@gmail.com" },
         { code: "30", name: "Devata Parin Krishna", pin: "2605", dob: "20/09", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" },
-        { code: "31", name: "Abhinav V Inamdar", pin: "2608", dob: "25/04", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" },
-        { code: "32", name: "Dattatreya V Inamdar", pin: "2609", dob: "01/04", batch: "SVK Vedic Math 1111", email: "suneelbm@gmail.com" }
+        { code: "31", name: "Abhinav V Inamdar", pin: "2608", dob: "25/04", batch: "SVK Vedic Math 1111", email: "preetivi.1991@gmail.com" },
+        { code: "32", name: "Dattatreya V Inamdar", pin: "2609", dob: "01/04", batch: "SVK Vedic Math 1111", email: "preetivi.1991@gmail.com" }
     ];
 
     let currentStudent = null;
